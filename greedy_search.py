@@ -47,6 +47,7 @@ class BaselineReorderer:
                 candidate_words = self._swap_words(words, i, i + 1)
                 candidate_text = " ".join(candidate_words)
                 candidate_perplexity = self._get_perplexity(candidate_text)
+                self.calculator.clear_gpu_memory()
                 
                 # If better, accept the swap
                 if candidate_perplexity < current_perplexity:
@@ -119,4 +120,4 @@ def create_submission(
 
 if __name__ == "__main__":
     # Create submission
-    create_submission(input_path="data/spp_submission.csv",output_path="submission.csv")
+    create_submission(input_path="data/textidzero.csv",output_path="submission.csv")

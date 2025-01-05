@@ -12,7 +12,7 @@ import pandas as pd
 import transformers
 import torch
 
-os.environ['OMP_NUM_THREADS'] = '1'
+os.environ['OMP_NUM_THREADS'] = '4'
 os.environ['TOKENIZERS_PARALLELISM'] = 'false'
 PAD_TOKEN_LABEL_ID = torch.nn.CrossEntropyLoss().ignore_index
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
