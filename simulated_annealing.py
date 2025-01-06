@@ -34,9 +34,9 @@ class TextReorderer:
     def reorder_with_simulated_annealing(
             self,
             text: str,
-            initial_temp: float = 1.0,
-            final_temp: float = 0.01,
-            max_iterations: int = 100,
+            initial_temp: float = 100.0,
+            final_temp: float = 0.0,
+            max_iterations: int = 5000,
             cooling_rate: float = 0.95,
             max_distance: Optional[int] = None
     ) -> Tuple[str, float]:
@@ -78,26 +78,33 @@ class TextReorderer:
             candidate_perplexity = self._get_perplexity(candidate_text)
 
             if candidate_perplexity < best_perplexity:
-                best_words = candidate_words
-                best_text =  " ".join(best_words)
+                best_words = candidate_words.copy()
+                #best_text =  " ".join(best_words)
                 best_perplexity = candidate_perplexity
-                print('>%d f(%s) = %.5f' % (iteration, best_text, best_perplexity))
+                #print('>%d %s = %.5f' % (iteration, best_text, best_perplexity))
 
             diff = candidate_perplexity - current_perplexity
+            exponent = -diff / temp
 
-            acceptance_criterion = math.exp(-diff / temp)
+            # Clamp exponent to avoid overflow/underflow
+            # For example, restrict to [-700, 700]. Adjust these bounds to your needs.
+            exponent = max(min(exponent, 700), -700)
+
+            acceptance_criterion = math.exp(exponent)
 
             if diff < 0 or random.random() < acceptance_criterion:
                 words = candidate_words
                 current_perplexity = candidate_perplexity
 
             # Cool down
-            temp *= cooling_rate
+            temp = temp - ((initial_temp - final_temp) / max_iterations)
+            # temp = initial_temp / math.log(iteration + 2)
+            # temp *= cooling_rate
             iteration += 1
 
             # Periodic logging
-            if iteration % 5 == 0:
-                print(f"Iteration {iteration}, Temp: {temp:.4f}, Best Perplexity: {best_perplexity:.4f}")
+            if iteration % 100 == 0:
+                print(f"Iteration {iteration}, Temp: {temp:.9f}, Best Perplexity: {best_perplexity:.4f}")
 
         return " ".join(best_words), best_perplexity
 
@@ -146,4 +153,4 @@ def create_submission(input_path: str, output_path: str, model_path: str = "goog
 
 if __name__ == "__main__":
     # Create submission
-    create_submission(input_path="data/textidzero.csv",output_path="submission_id0.csv")
+    create_submission(input_path="data/textidone.csv",output_path="submission_id1.csv")
